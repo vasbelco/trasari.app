@@ -1,18 +1,32 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Variables desde Vercel (Settings → Environment Variables)
+// ——— CORS helper (permite llamadas desde apps externas como Hoppscotch) ———
+function setCORS(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*"); // en prod puedes restringir dominio
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+}
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
-
-// Cliente administrador con service_role (no exponer en frontend)
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
+  setCORS(res);
+
+  // Responder preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método no permitido" });
+  }
 
   const { company_name, company_slug, email, password, name, phone } = req.body || {};
-  if (!company_name || !email || !password || !name)
+  if (!company_name || !email || !password || !name) {
     return res.status(400).json({ error: "Faltan campos requeridos" });
+  }
 
   try {
     // 1) Crear usuario en Auth
@@ -23,7 +37,6 @@ export default async function handler(req, res) {
       email_confirm: true
     });
     if (authErr || !created?.user) throw authErr || new Error("Error al crear usuario");
-
     const auth_uid = created.user.id;
 
     // 2) Crear empresa
@@ -33,7 +46,6 @@ export default async function handler(req, res) {
       .select("id")
       .single();
     if (compErr || !companyRow?.id) throw compErr || new Error("Error al crear empresa");
-
     const company_id = companyRow.id;
 
     // 3) Crear app_user (owner)
@@ -47,3 +59,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e?.message || "Error interno" });
   }
 }
+
