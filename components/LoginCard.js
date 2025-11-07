@@ -10,7 +10,7 @@ export default function LoginCard() {
     }}>
       <h2 style={{textAlign: 'center', marginBottom: '1.5rem'}}>Iniciar sesión</h2>
       <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-        <input type="email" placeholder="Correo electrónico" style={{padding: '10px', border: '1px solid #ccc', borderRadius: '8px'}} />
+        <input type="email" placeholder="Nombre de usuario" style={{padding: '10px', border: '1px solid #ccc', borderRadius: '8px'}} />
         <input type="password" placeholder="Contraseña" style={{padding: '10px', border: '1px solid #ccc', borderRadius: '8px'}} />
         <button style={{padding: '10px', background: '#2563EB', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
           Acceder
