@@ -1,10 +1,3 @@
-// Estructura de archivos (crea exactamente estos 3 archivos en tu repo "trasari.app")
-// 1) package.json
-// 2) pages/index.js
-// 3) .gitignore
-
-
-// ------- package.json -------
 {
 "name": "trasari-app",
 "private": true,
