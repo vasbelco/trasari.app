@@ -1,14 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
 
 // Variables desde Vercel (Settings → Environment Variables)
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
 
 // Cliente administrador con service_role (no exponer en frontend)
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
   const { company_name, company_slug, email, password, name, phone } = req.body || {};
@@ -16,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Faltan campos requeridos" });
 
   try {
-    // 1️⃣ Crear usuario en Auth
+    // 1) Crear usuario en Auth
     const { data: created, error: authErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -27,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const auth_uid = created.user.id;
 
-    // 2️⃣ Crear empresa
+    // 2) Crear empresa
     const { data: companyRow, error: compErr } = await supabaseAdmin
       .from("companies")
       .insert([{ name: company_name, slug: company_slug || null }])
@@ -37,15 +36,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const company_id = companyRow.id;
 
-    // 3️⃣ Crear app_user (owner)
+    // 3) Crear app_user (owner)
     const { error: appUserErr } = await supabaseAdmin
       .from("app_users")
       .insert([{ company_id, auth_uid, email, name, phone: phone || null, role: "owner" }]);
     if (appUserErr) throw appUserErr;
 
     return res.status(200).json({ ok: true, company_id, auth_uid });
-  } catch (e: any) {
-    console.error("Signup error:", e?.message || e);
+  } catch (e) {
     return res.status(500).json({ error: e?.message || "Error interno" });
   }
 }
