@@ -1,0 +1,22 @@
+// Estructura de archivos (crea exactamente estos 3 archivos en tu repo "trasari.app")
+// 1) package.json
+// 2) pages/index.js
+// 3) .gitignore
+
+
+// ------- package.json -------
+{
+"name": "trasari-app",
+"private": true,
+"version": "0.1.0",
+"scripts": {
+"dev": "next dev",
+"build": "next build",
+"start": "next start"
+},
+"dependencies": {
+"next": "^14.2.5",
+"react": "^18.2.0",
+"react-dom": "^18.2.0"
+}
+}
